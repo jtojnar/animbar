@@ -1,0 +1,94 @@
+
+*** About animbar ******************************************************
+
+animbar lets you easily create your own animation setup. From a set of 
+input images two output images are computed, that are printed one on 
+paper and one on transparency. By moving the transparency over the 
+paper you obtain a fascinating animation effect. This kind of animation 
+technique is known under several names: picket fence animation, barrier 
+grid animation, etc. Recently, it found some attention through books 
+such as "Magic Moving Images: Animated optical illusions" by Colin Ord 
+or the series by Rufus Butler Seder "Gallop!: A Scanimation Picture 
+Book", "Swing!: A Scanimation Picture Book", "Waddle!: A Scanimation 
+Picture Book".
+
+In the following we shortly describe how the output is computed. If you
+are interested in simply using animbar, you may skip this section and
+continue right with the user guide below.
+
+The idea is, to take a handful of images, slice each image into
+several strips, and reassemble a base image by one after another putting
+strips of images together.
+
+As an example, consider five input images. The first strip of the base
+image will be the first image's first strip, the second in base will
+be the second of the second image, ..., the sixth strip of base will be
+the sixth strip of the first and so on.
+
+	1,1 2,2 3,3 4,4 5,5 1,6 2,7 3,8 4,9 5,10 1,11 2,12 3,13 4,14 ...
+
+Here i,j means j-th strip of the i-th image.
+
+The, we further create a mask image that has 4 opaque and 1 transparent 
+strip again and again combined. If we now place the mask image on top
+of the base image, the mask will make visible only the strips that
+originally belonged to the same image. If we move the mask, it will
+one after another show the original images, thus creating some animation
+effect.
+
+animbar is a progam to compute the base image and the mask image from
+a set of input images. The following is a short user guide to animbar.
+
+*** User Guide *********************************************************
+
+This is a short howto on using animbar. The input to animbar is a set
+of images of same pixel size. This means, that all the images, we are
+going to load, must have the same number of pixels both in width and
+height. Thinking about the way, bar animations are created, this seems
+to be a reasonable requirement.
+
+The images may be of any format your local QT installation supports.
+After starting animbar, go to the menu
+	File -> Open ...
+to load the input images. The file dialog is setup in such a way to
+filter all the supported file types. The therein found list of valid
+file endings is the place to look for what format your input images 
+should be. You may also have a look at this table to learn, what 
+formats QT support by default
+
+http://doc.qt.nokia.com/4.6/qimage.html#reading-and-writing-image-files
+
+After having opened all input images (you may select multiple images
+in the file open dialog at a time), all loaded images are display as
+thumbnail along with their short filename in the left part of the user
+interface. You may now rearrange the order of images by moving them
+around ("drag and drop"). You may also remove the selected images by
+pressing the delete key and add further images through File -> Open.
+
+Once we are done with setting up the input images, compute the bar
+animation by selecting the menu entry
+	Edit -> Compute Animation
+Depending on the input size of your images and the power of your 
+computer, this may take some seconds. The resulting base image, that
+is the image combining all the input images into one, is display right
+after computation has finished. To get an idea on what the final 
+animation will look like, move the slider right below the image display
+area: This will overlay the bar mask with the base image; actually what
+we will do in real world after printing the images.
+
+If we are happy with the result, we save the base image
+	File -> Save Base Image ...
+and the bar mask
+	File -> Save Bar Mask ...
+You may now print the computed images with your favourite application.
+
+A word on printing. We will obtain best results when we print the images
+without any scaling involved. Downscaling the images, this means 
+reducing the number of pixels that gets printed, will decline the 
+quality of the animation. Upscaling, that is enlarging the images, 
+should be fine though. We will learn more about this as animbar gets
+used.
+
+If you need any help, are looking for further information, have found
+a bug or have a suggestion on how to improve animbar, please let us know
+at http://animbar.mnim.org.

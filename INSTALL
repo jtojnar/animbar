@@ -1,0 +1,28 @@
+
+animbar is configured for out of source compilation with cmake 
+(www.cmake.org). The only requirement is a recent QT 
+(http://qt.nokia.com/) installation. 
+
+To compile and install animbar, get the sources, unpack them and change 
+to the root directory of the animbar local tree. There, create a build 
+directory,
+	
+	mkdir build
+	
+and change to that directory
+
+	cd build
+	
+Run cmake to setup the build scripts in the build directory
+
+	cmake ../
+	
+This gives you a Makefile, that lets you compile the source with
+
+	make
+	
+and finally install with (become root)
+
+	make install
+	
+For more information, have a look at the cmake homepage www.cmake.org.
