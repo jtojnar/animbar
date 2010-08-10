@@ -22,15 +22,19 @@ project(animbar)
 set (animbar_VERSION_MAJOR 1)
 set (animbar_VERSION_MINOR 0)
 
-# on windows, we link agains qmain to have a winmain which let us start
-# without console
 IF(WIN32)
+	# on windows, we link agains qmain to have a winmain which let us start
+	# without console
 	SET(QT_USE_QTMAIN 1)
+ELSE(WIN32)
+	# -Wall with Visual Studio gives us tons of warnings from qt we are
+	# not interested in. so we only include if not on win32.
+	add_definitions(-Wall)
 ENDIF(WIN32)
 
 FIND_PACKAGE(Qt4 REQUIRED)
 
-add_definitions(-DANIMBAR_DEBUG -Wall)
+add_definitions(-DANIMBAR_DEBUG)
 
 add_subdirectory(src)
 
