@@ -44,3 +44,5 @@ ADD_EXECUTABLE(animbar
 )
 
 TARGET_LINK_LIBRARIES(animbar ${QT_LIBRARIES})
+
+install (TARGETS animbar DESTINATION bin)
