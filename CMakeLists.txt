@@ -22,6 +22,12 @@ project(animbar)
 set (animbar_VERSION_MAJOR 1)
 set (animbar_VERSION_MINOR 0)
 
+# on windows, we link agains qmain to have a winmain which let us start
+# without console
+IF(WIN32)
+	SET(QT_USE_QTMAIN 1)
+ENDIF(WIN32)
+
 FIND_PACKAGE(Qt4 REQUIRED)
 
 add_definitions(-DANIMBAR_DEBUG -Wall)
