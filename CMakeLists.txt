@@ -50,6 +50,15 @@ INCLUDE(${QT_USE_FILE})
 
 add_definitions(-DANIMBAR_DEBUG)
 
+IF(NOT CMAKE_BUILD_TYPE)
+	SET(
+		CMAKE_BUILD_TYPE Release CACHE STRING
+		"Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+		FORCE
+	)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
+
 #-----------------------------------------------------------------------
 # recurse
 #-----------------------------------------------------------------------
@@ -61,7 +70,11 @@ add_subdirectory(src)
 #-----------------------------------------------------------------------
 
 # this will create a target "package_source", hence do 
-# "make package_source"
+# "make package_source" on linux. for msvc on windows, there will be a
+# package build target which creates an installer package with nsis. 
+# which is - i have to say - gorgeous.
+# see http://batchmake.org/Wiki/CMake:CPackConfiguration for a list of
+# variables.
 set(CPACK_PACKAGE_VERSION_MAJOR "${animbar_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${animbar_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
@@ -74,5 +87,6 @@ ELSE(NOT WIN32)
 ENDIF(NOT WIN32)
 set(CPACK_SOURCE_IGNORE_FILES "${CMAKE_BINARY_DIR}/*")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "${PROJECT_NAME}-${animbar_VERSION_MAJOR}.${animbar_VERSION_MINOR}")
+set(CPACK_BINARY_PACKAGE_FILE_NAME "${PROJECT_NAME}-${animbar_VERSION_MAJOR}.${animbar_VERSION_MINOR}")
 include(CPack)
 

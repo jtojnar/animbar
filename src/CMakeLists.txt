@@ -89,7 +89,7 @@ TARGET_LINK_LIBRARIES(animbar
 # will be used later on: PLUGIN_DEST_DIR, QTCONF_DEST_DIR, APPS and DIR
 SET(PLUGIN_DEST_DIR bin)
 SET(QTCONF_DEST_DIR bin)
-SET(DIRS ${QT_LIBRARY_DIRS})
+SET(DIRS ${QT_BINARY_DIR})
 SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}")
 IF(APPLE)
   SET(plugin_dest_dir QtTest.app/Contents/MacOS)
@@ -132,6 +132,7 @@ INSTALL(
 #-----------------------------------------------------------------------
 # now here happens the real magic. the BundleUtilities copy all Qt
 # dependancies.
+
 INSTALL(
 	CODE "
 		file(GLOB_RECURSE QTPLUGINS
