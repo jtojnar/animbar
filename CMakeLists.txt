@@ -19,24 +19,46 @@ cmake_minimum_required(VERSION 2.6)
 
 project(animbar) 
 
+#-----------------------------------------------------------------------
+# set some variables.
+#-----------------------------------------------------------------------
+
 set (animbar_VERSION_MAJOR 1)
 set (animbar_VERSION_MINOR 0)
 
-IF(WIN32)
+IF(MSVC)
 	# on windows, we link agains qmain to have a winmain which let us start
 	# without console
-	SET(QT_USE_QTMAIN 1)
-ELSE(WIN32)
+	SET(QT_USE_QTMAIN TRUE)
+ELSE(MSVC)
 	# -Wall with Visual Studio gives us tons of warnings from qt we are
 	# not interested in. so we only include if not on win32.
 	add_definitions(-Wall)
-ENDIF(WIN32)
+ENDIF(MSVC)
+
+#-----------------------------------------------------------------------
+# setup qt
+#-----------------------------------------------------------------------
 
 FIND_PACKAGE(Qt4 REQUIRED)
 
+INCLUDE(${QT_USE_FILE})
+
+#-----------------------------------------------------------------------
+# some all platform options
+#-----------------------------------------------------------------------
+
 add_definitions(-DANIMBAR_DEBUG)
 
+#-----------------------------------------------------------------------
+# recurse
+#-----------------------------------------------------------------------
+
 add_subdirectory(src)
+
+#-----------------------------------------------------------------------
+# cpack configuration
+#-----------------------------------------------------------------------
 
 # this will create a target "package_source", hence do 
 # "make package_source"
