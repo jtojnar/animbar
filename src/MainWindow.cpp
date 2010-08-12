@@ -131,6 +131,8 @@ bool MainWindow::setupUI()
 	scrollArea->setWidget(imageLabel);
 
 	slider = new QSlider(Qt::Horizontal, rightSide);
+	slider->setTickInterval(1);
+	slider->setTickPosition(QSlider::NoTicks);
 	vLayoutR->addWidget(slider);
 	
 	centralWidget->setStretchFactor(1, 20);
@@ -284,6 +286,7 @@ QString MainWindow::getSupportedImageFormats() const
 		imageFilter += " *.";
 		imageFilter += supportedFormats[i].data();
 	}
+	imageFilter += ")";
 	
 	return imageFilter;
 }
@@ -495,6 +498,7 @@ bool MainWindow::compute(const std::vector< QImage* > imgs)
 	slider->setSingleStep(1);
 	slider->setTracking(true);
 	slider->setValue(0);
+	slider->setTickPosition(QSlider::TicksBelow);
 	connect(slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChangedValue(int)));
 	/* when slider's default value is zero, setValue will not trigger 
 	 * the signal. hence we setValue before connect and then call the

@@ -95,8 +95,8 @@ SET(QTCONF_DEST_DIR bin)
 SET(DIRS ${QT_BINARY_DIR})
 SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}")
 IF(APPLE)
-  SET(plugin_dest_dir QtTest.app/Contents/MacOS)
-  SET(qtconf_dest_dir QtTest.app/Contents/Resources)
+  SET(PLUGIN_DEST_DIR QtTest.app/Contents/MacOS)
+  SET(QTCONF_DEST_DIR QtTest.app/Contents/Resources)
   SET(APPS "\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app")
 ENDIF(APPLE)
 IF(WIN32)
@@ -118,16 +118,18 @@ INSTALL(
 # includes all image format plugins. that is what we want.
 INSTALL(
 	DIRECTORY "${QT_PLUGINS_DIR}/imageformats" 
-	DESTINATION ${plugin_dest_dir}/plugins 
+	DESTINATION ${PLUGIN_DEST_DIR}/plugins 
 	COMPONENT Runtime
 )
+
+MESSAGE("${QT_PLUGINS_DIR}")
 
 #-----------------------------------------------------------------------
 # the following inserts CODE to the INSTALL script to write a qt.conf,
 # from what I can tell this just creates and empty qt.conf.
 INSTALL(
 	CODE "
-		file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")
+		file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")
     " 
     COMPONENT Runtime
 )
@@ -139,7 +141,7 @@ INSTALL(
 INSTALL(
 	CODE "
 		file(GLOB_RECURSE QTPLUGINS
-		\"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+		\"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
 		include(BundleUtilities)
 		fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
     " 
