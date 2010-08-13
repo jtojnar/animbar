@@ -58,6 +58,9 @@ void MainWindow::_init()
 	openDir = QDir::home();
 	saveDir = openDir;
 	setSaveToOpen = true;
+	
+	/* strip width in pixels, three seems to be a good value */
+	stripWidth = 3;
 }
 
 //----------------------------------------------------------------------
@@ -443,11 +446,26 @@ bool MainWindow::compute(const std::vector< QImage* > imgs)
 		return false;
 	}
 	
+	QSize size0 = imgs[0]->size();
+	
+	/* get strip width in pixels */
+	
+	bool ok;
+	stripWidth = QInputDialog::getInt(
+		this, 
+		tr("Enter strip width in pixels"),
+		tr("Strip width in pixels:"),
+		stripWidth,
+		1,
+		size0.width(),
+		1,
+		&ok);
+	
+	if (!ok) return false;		
+	
 	/* reset results */
 	baseImage = QImage();
 	barMask = QImage();
-	
-	QSize size0 = imgs[0]->size();
 	
 	/* setup progress bar */
 	
@@ -464,26 +482,29 @@ bool MainWindow::compute(const std::vector< QImage* > imgs)
 	
 	baseImage = QImage(size0, QImage::Format_ARGB32_Premultiplied);
 	
-	/* go from left to right through baseImage. Write a column of each
+	/* go from left to right through baseImage. Write k columns of each
 	 * image again and again.
 	 */
-	for ( int col=0 ; col<size0.width() ; ) {
-		pbar->setValue(col+1);
-		for ( int i=0 ; i<nrImgs && col<size0.width() ; i++, col++ )
-			for ( int row=0 ; row<size0.height() ; row++ )
-				baseImage.setPixel(col, row, imgs[i]->pixel(col, row));
-	}
+	for ( int col=0 ; col<size0.width() ; )
+		for ( int i=0 ; i<nrImgs ; i++ )
+			for ( int j=0 ; j<stripWidth && col<size0.width() ; j++, col++ ) {
+				pbar->setValue(col+1);
+				for ( int row=0 ; row<size0.height() ; row++ )
+					baseImage.setPixel(col, row, imgs[i]->pixel(col, row));
+			}
 	
 	/*
 	 * then, compute barmask
 	 */
 	
 	barMask = QImage(size0, QImage::Format_Mono);
-	for ( int col=0 ; col < size0.width() ; col++ ) {
-		pbar->setValue(size0.width()+col+1);
-		for ( int row=0 ; row < size0.height() ; row++ )
-			barMask.setPixel(col, row, (col % nrImgs == 0) ? 1 : 0 );
-	}
+	for ( int col=0 ; col < size0.width() ; )
+		for ( int i=0 ; i<nrImgs ; i++ )
+			for ( int j=0 ; j<stripWidth && col<size0.width() ; j++, col++ ) {
+				pbar->setValue(size0.width()+col+1);
+				for ( int row=0 ; row < size0.height() ; row++ )
+					barMask.setPixel(col, row, (i == 0) ? 1 : 0 );
+			}
 			
 	/* image is the one displayed on imageLabel */
 	
@@ -529,12 +550,12 @@ void MainWindow::sliderChangedValue(int idx)
 		 */
 		if (idx > 1) {
 			painter.setPen(QColor(0,0,0));
-			painter.fillRect(0,0,idx-1,image.size().height(),Qt::SolidPattern);
+			painter.fillRect(0,0,stripWidth*(idx-1),image.size().height(),Qt::SolidPattern);
 		}
 		
 		/* set barMask with some offset to the right */
 		painter.setCompositionMode(QPainter::CompositionMode_Source);
-		painter.drawImage(idx-1, 0, barMask);
+		painter.drawImage(stripWidth*(idx-1), 0, barMask);
 		
 		/* finally, multiply baseImage */
 		painter.setCompositionMode(QPainter::CompositionMode_Multiply);

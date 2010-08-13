@@ -87,6 +87,8 @@ private:
 	QImage baseImage;
 	QImage barMask;
 	QImage image;
+	
+	int stripWidth;
 };
 
 #endif // _MAINWINDOWFORM_H
