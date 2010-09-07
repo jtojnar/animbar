@@ -133,9 +133,44 @@ bool MainWindow::setupUI()
 	scrollArea->setAlignment(Qt::AlignCenter);
 	vLayoutR->addWidget(scrollArea);
 	
+	QString welcomeMsg = 
+		tr("Welcome to ") + ANIMBAR_PROG_NAME + 
+		" v" + QString("%1.%2").arg(ANIMBAR_VERSION_MAJOR).arg(ANIMBAR_VERSION_MINOR);
+	
 	imageLabel = new QLabel(rightSide);
-	scrollArea->setWidget(imageLabel);
+	imageLabel->setWordWrap(true);
+	imageLabel->setOpenExternalLinks(true);
+	imageLabel->setText(
+		"<p><font size=+3>" + welcomeMsg + "</font></p>" +
+		"<p>This short step-by-step tutorial guides you through creating your first animation with " +
+		ANIMBAR_PROG_NAME + ". For more documentation, please visit the project's webpage " +
+		"<a href=\"http://animbar.mnim.org\">http://animbar.mnim.org</a>.</p>" +
+		"<p><font size=+3>1.</font> Select <i>Open Images ...</i> from the <i>File</i> menu to open one or " +
+		"many input images. The loaded images are displayed in the list view to the left. " + 
+		"Three to six input images are a good number for a start.</p>" +
+		"<p><font size=+3>2.</font> Select <i>Compute Animation</i> from the <i>Edit</i> menu to generate " +
+		"the output files for the picket fence animation. You are asked to specify " +
+		"the strip width, that is the pickets' width, in pixel. Three is a good value " +
+		"for a first animation.</p>" +
+		"<p><font size=+3>3.</font> Verify the generated output by moving the slider " +
+		"at the bottom of the user interface. Use the <i>zoom</i> entries in the <i>View</i> " +
+		"menu to further evaluate the animation.</p>" +
+		"<p><font size=+3>4.</font> To test the generated output in a real world animation, " +
+		"use <i>Save Base Image ...</i> and <i>Save Bar Mask ...</i> in the <i>File</i> menu " +
+		"to save the output to image files. Print the base image on paper and the bar mask " +
+		"to transparancy.</p>" +
+		"<p>If you have any suggestion or need further assistance, check out " +
+		"<a href=\"http://animbar.mnim.org\">http://animbar.mnim.org</a>.</p>"
+	);
+	
+//This is a short step-by-step tutorial for creating your first
+//picket fence animation.");
 
+//<p><center><font size=+2><b>") +  + " v" + version + tr("</b></font></center></p>"
+//"<p><center><a href=\"http://animbar.mnim.org\">http://animbar.mnim.org</a></center></p>"
+
+	scrollArea->setWidget(imageLabel);
+	
 	slider = new QSlider(Qt::Horizontal, rightSide);
 	slider->setTickInterval(1);
 	slider->setTickPosition(QSlider::NoTicks);
@@ -146,9 +181,8 @@ bool MainWindow::setupUI()
 	/**
 	 * the status bar is already setup by default
 	 **/
-
-	QString version = QString("%1.%2").arg(ANIMBAR_VERSION_MAJOR).arg(ANIMBAR_VERSION_MINOR);	
-	statusBar()->showMessage(tr("Welcome to ") + ANIMBAR_PROG_NAME + " v" + version, 5000);
+	 	
+	statusBar()->showMessage(welcomeMsg, 5000);
 	
 	return true;
 }
@@ -664,18 +698,27 @@ bool MainWindow::saveImage(const QImage& img, const QString& caption)
 
 void MainWindow::zoomIn()
 {
-	renderPixmap(*(imageLabel->pixmap()), (zoomFactor + 0.25) / zoomFactor);
+#if 0
+	renderPixmap(*(imageLabel->pixmap()), 1.25);
 	
-	zoomFactor += 0.25;
+	zoomFactor *= 1.25;
+
+	the problem: zoomout until image is very small, than zoomReset: we
+	have only some pixels left.
+	
+	ways to solve this: have a copy of original size somewhere for all
+	images, from which the zoomed version is computed! problem: lots
+	of memory. ...
+#endif
 }
 
 //----------------------------------------------------------------------
 
 void MainWindow::zoomOut()
 {
-	renderPixmap(*(imageLabel->pixmap()), (zoomFactor - 0.25) / zoomFactor);
+	renderPixmap(*(imageLabel->pixmap()), 0.75);
 	
-	zoomFactor -= 0.25;
+	zoomFactor *= 0.75;
 }
 
 //----------------------------------------------------------------------
