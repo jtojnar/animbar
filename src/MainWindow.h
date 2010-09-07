@@ -49,6 +49,10 @@ private slots:
 
 	void compute();
 	
+	void zoomIn();
+	void zoomOut();
+	void zoomReset();
+	
 	void aboutqt();
 	void about();
 	
@@ -59,6 +63,8 @@ private slots:
 private:
 	/* private member functions */
 	void _init();
+	
+	void renderPixmap(const QPixmap&, double=1.);
 	
 	bool setupUI();
 	bool setupMenus();
@@ -89,6 +95,8 @@ private:
 	QImage image;
 	
 	int stripWidth;
+	
+	double zoomFactor;
 };
 
 #endif // _MAINWINDOWFORM_H

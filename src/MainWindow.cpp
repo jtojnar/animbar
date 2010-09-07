@@ -61,6 +61,9 @@ void MainWindow::_init()
 	
 	/* strip width in pixels, three seems to be a good value */
 	stripWidth = 3;
+	
+	/* Initial zoom factor is 1, e.g. no zoom */
+	zoomFactor = 1.;
 }
 
 //----------------------------------------------------------------------
@@ -205,6 +208,30 @@ bool MainWindow::setupMenus()
     action->setStatusTip(tr("Compute bar animation from input images"));
     connect(action, SIGNAL(triggered()), this, SLOT(compute()));
 	editMenu->addAction(action);
+	
+	/**
+	 * view menu
+	 **/
+	
+	QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
+	
+	action = new QAction(tr("Zoom &In"), this);
+	action->setShortcut(tr("Ctrl++"));
+    action->setStatusTip(tr("Zoom in, e.g. enlarging the displayed view"));
+    connect(action, SIGNAL(triggered()), this, SLOT(zoomIn()));
+	viewMenu->addAction(action);
+	
+	action = new QAction(tr("Zoom &Out"), this);
+	action->setShortcut(tr("Ctrl+-"));
+    action->setStatusTip(tr("Zoom out, e.g. shrinking the displayed view"));
+    connect(action, SIGNAL(triggered()), this, SLOT(zoomOut()));
+	viewMenu->addAction(action);
+	
+	action = new QAction(tr("&Normal View"), this);
+	action->setShortcut(tr("Ctrl+0"));
+    action->setStatusTip(tr("Change view to normal, e.g. reset zoom level to default"));
+    connect(action, SIGNAL(triggered()), this, SLOT(zoomReset()));
+	viewMenu->addAction(action);
 	
 	/**
 	 * help menu
@@ -563,9 +590,27 @@ void MainWindow::sliderChangedValue(int idx)
 
 		painter.end();
 		
-		imageLabel->setPixmap(QPixmap::fromImage(image));
-		imageLabel->resize(imageLabel->pixmap()->size());
+		zoomFactor = 1.;
+		
+		renderPixmap(QPixmap::fromImage(image));
 	}
+}
+
+//----------------------------------------------------------------------
+
+void MainWindow::renderPixmap(const QPixmap& pixmap, double scale)
+{
+	if (scale != 1.)
+		/* no smoothing, as we want to see the pixels */
+		imageLabel->setPixmap(
+			pixmap.scaled(
+				scale*pixmap.width(), 
+				scale*pixmap.height(), 
+				Qt::IgnoreAspectRatio, 
+				Qt::FastTransformation)
+		);	
+	else imageLabel->setPixmap(pixmap);
+	imageLabel->resize(pixmap.size());
 }
 
 //----------------------------------------------------------------------
@@ -613,6 +658,33 @@ bool MainWindow::saveImage(const QImage& img, const QString& caption)
 	} while (true);
 	
 	return true;
+}
+
+//----------------------------------------------------------------------
+
+void MainWindow::zoomIn()
+{
+	renderPixmap(*(imageLabel->pixmap()), (zoomFactor + 0.25) / zoomFactor);
+	
+	zoomFactor += 0.25;
+}
+
+//----------------------------------------------------------------------
+
+void MainWindow::zoomOut()
+{
+	renderPixmap(*(imageLabel->pixmap()), (zoomFactor - 0.25) / zoomFactor);
+	
+	zoomFactor -= 0.25;
+}
+
+//----------------------------------------------------------------------
+
+void MainWindow::zoomReset()
+{
+	renderPixmap(*(imageLabel->pixmap()), 1. / zoomFactor);
+	
+	zoomFactor = 1.;
 }
 
 //----------------------------------------------------------------------
