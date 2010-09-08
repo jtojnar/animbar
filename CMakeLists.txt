@@ -24,7 +24,7 @@ project(animbar)
 #-----------------------------------------------------------------------
 
 set (animbar_VERSION_MAJOR 1)
-set (animbar_VERSION_MINOR 0)
+set (animbar_VERSION_MINOR 1)
 
 IF(MSVC)
 	# on windows, we link agains qmain to have a winmain which let us start

@@ -144,7 +144,7 @@ bool MainWindow::setupUI()
 		"<p><font size=+3>" + welcomeMsg + "</font></p>" +
 		"<p>This short step-by-step tutorial guides you through creating your first animation with " +
 		ANIMBAR_PROG_NAME + ". For more documentation, please visit the project's webpage " +
-		"<a color=green href=\"http://animbar.mnim.org\">http://animbar.mnim.org</a>.</p>" +
+		"<a href=\"http://animbar.mnim.org\" style=\"color: white;\">http://animbar.mnim.org</a>.</p>" +
 		"<p><font size=+3>1.</font> Select <i>Open Images ...</i> from the <i>File</i> menu to open one or " +
 		"many input images. The loaded images are displayed in the list view to the left. " + 
 		"Three to six input images are a good number for a start.</p>" +
@@ -160,7 +160,7 @@ bool MainWindow::setupUI()
 		"to save the output to image files. Print the base image on paper and the bar mask " +
 		"to transparancy.</p>" +
 		"<p>If you have any suggestion or need further assistance, check out " +
-		"<a href=\"http://animbar.mnim.org\">http://animbar.mnim.org</a>.</p>"
+		"<a href=\"http://animbar.mnim.org\" style=\"color: white;\">http://animbar.mnim.org</a>.</p>"
 	);
 	
 //This is a short step-by-step tutorial for creating your first
