@@ -144,7 +144,7 @@ bool MainWindow::setupUI()
 		"<p><font size=+3>" + welcomeMsg + "</font></p>" +
 		"<p>This short step-by-step tutorial guides you through creating your first animation with " +
 		ANIMBAR_PROG_NAME + ". For more documentation, please visit the project's webpage " +
-		"<a href=\"http://animbar.mnim.org\">http://animbar.mnim.org</a>.</p>" +
+		"<a color=green href=\"http://animbar.mnim.org\">http://animbar.mnim.org</a>.</p>" +
 		"<p><font size=+3>1.</font> Select <i>Open Images ...</i> from the <i>File</i> menu to open one or " +
 		"many input images. The loaded images are displayed in the list view to the left. " + 
 		"Three to six input images are a good number for a start.</p>" +
@@ -575,12 +575,15 @@ bool MainWindow::compute(const std::vector< QImage* > imgs)
 	statusBar()->removeWidget(pbar);
 	delete pbar;
 	
+	/* reset zoomFactor to one before the slider signal is triggered */
+	zoomFactor = 1.;
+	
 	/* configure slider to current setup */
 	slider->setRange(0, nrImgs);
 	slider->setSingleStep(1);
 	slider->setTracking(true);
 	slider->setValue(0);
-	slider->setTickPosition(QSlider::TicksBelow);
+	slider->setTickPosition(QSlider::TicksBelow);	
 	connect(slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChangedValue(int)));
 	/* when slider's default value is zero, setValue will not trigger 
 	 * the signal. hence we setValue before connect and then call the
@@ -597,8 +600,7 @@ void MainWindow::sliderChangedValue(int idx)
 {
 	if (idx == 0) {
 		/* for idx=0, display without mask. */
-		imageLabel->setPixmap(QPixmap::fromImage(baseImage));
-		imageLabel->resize(imageLabel->pixmap()->size());
+		currentPixmap = QPixmap::fromImage(baseImage);
 	} else {
 		/* this will see some optimization one day. for now, it's a 
 		 * proof of concept 
@@ -624,27 +626,28 @@ void MainWindow::sliderChangedValue(int idx)
 
 		painter.end();
 		
-		zoomFactor = 1.;
-		
-		renderPixmap(QPixmap::fromImage(image));
+		/* currentPixmap is 1:1 version from which any zoom is computed */
+		currentPixmap = QPixmap::fromImage(image);
 	}
+	
+	renderCurrentPixmap();
 }
 
 //----------------------------------------------------------------------
 
-void MainWindow::renderPixmap(const QPixmap& pixmap, double scale)
+void MainWindow::renderCurrentPixmap()
 {
-	if (scale != 1.)
+	if (zoomFactor != 1.)
 		/* no smoothing, as we want to see the pixels */
 		imageLabel->setPixmap(
-			pixmap.scaled(
-				scale*pixmap.width(), 
-				scale*pixmap.height(), 
+			currentPixmap.scaled(
+				zoomFactor*currentPixmap.width(), 
+				zoomFactor*currentPixmap.height(), 
 				Qt::IgnoreAspectRatio, 
 				Qt::FastTransformation)
 		);	
-	else imageLabel->setPixmap(pixmap);
-	imageLabel->resize(pixmap.size());
+	else imageLabel->setPixmap(currentPixmap);
+	imageLabel->resize(imageLabel->pixmap()->size());
 }
 
 //----------------------------------------------------------------------
@@ -698,36 +701,27 @@ bool MainWindow::saveImage(const QImage& img, const QString& caption)
 
 void MainWindow::zoomIn()
 {
-#if 0
-	renderPixmap(*(imageLabel->pixmap()), 1.25);
-	
 	zoomFactor *= 1.25;
-
-	the problem: zoomout until image is very small, than zoomReset: we
-	have only some pixels left.
 	
-	ways to solve this: have a copy of original size somewhere for all
-	images, from which the zoomed version is computed! problem: lots
-	of memory. ...
-#endif
+	renderCurrentPixmap();
 }
 
 //----------------------------------------------------------------------
 
 void MainWindow::zoomOut()
 {
-	renderPixmap(*(imageLabel->pixmap()), 0.75);
-	
 	zoomFactor *= 0.75;
+		
+	renderCurrentPixmap();
 }
 
 //----------------------------------------------------------------------
 
 void MainWindow::zoomReset()
 {
-	renderPixmap(*(imageLabel->pixmap()), 1. / zoomFactor);
-	
 	zoomFactor = 1.;
+	
+	renderCurrentPixmap();
 }
 
 //----------------------------------------------------------------------

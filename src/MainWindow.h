@@ -64,7 +64,7 @@ private:
 	/* private member functions */
 	void _init();
 	
-	void renderPixmap(const QPixmap&, double=1.);
+	void renderCurrentPixmap();
 	
 	bool setupUI();
 	bool setupMenus();
@@ -94,8 +94,8 @@ private:
 	QImage barMask;
 	QImage image;
 	
+	QPixmap currentPixmap;
 	int stripWidth;
-	
 	double zoomFactor;
 };
 
