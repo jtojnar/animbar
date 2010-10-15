@@ -14,6 +14,11 @@
 # to get more verbose output or 
 #		set(CMAKE_VERBOSE_MAKEFILE ON)
 # herein
+#
+# on win32, install visual studio express 2008 or 2010 and qt "framework only" 
+# for vs2008. Get cmake from www.cmake.org. cmake creates a solution with four
+# projects. "animbar" compiles the source and "package" creates the windows
+# installer. Only release builds will work on win32 because of dependancy madness.
 
 cmake_minimum_required(VERSION 2.6)
 
