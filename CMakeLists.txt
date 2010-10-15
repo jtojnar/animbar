@@ -72,7 +72,7 @@ add_subdirectory(src)
 # this will create a target "package_source", hence do 
 # "make package_source" on linux. for msvc on windows, there will be a
 # package build target which creates an installer package with nsis. 
-# which is - i have to say - gorgeous.
+# which is - I have to say - gorgeous.
 # see http://batchmake.org/Wiki/CMake:CPackConfiguration for a list of
 # variables.
 set(CPACK_PACKAGE_VERSION_MAJOR "${animbar_VERSION_MAJOR}")
