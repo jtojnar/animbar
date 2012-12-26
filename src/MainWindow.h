@@ -46,6 +46,7 @@ private slots:
 	void openFile();
 	void saveBaseImage();
 	void saveBarMask();
+    void saveAnimation();
 
 	void compute();
 	
@@ -63,6 +64,12 @@ private slots:
 private:
 	/* private member functions */
 	void _init();
+
+    /* documented in source code */
+    bool animationIsComputed();
+
+    /* documented in source code */
+    bool getParameters(const QImage&, unsigned int&, unsigned int&);
 	
 	void renderCurrentPixmap();
 	

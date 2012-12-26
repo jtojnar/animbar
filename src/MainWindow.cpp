@@ -221,6 +221,14 @@ bool MainWindow::setupMenus()
     action->setStatusTip(tr("Save bar mask image"));
     connect(action, SIGNAL(triggered()), this, SLOT(saveBarMask()));
 	fileMenu->addAction(action);
+
+    fileMenu->addSeparator();
+
+    action = new QAction(tr("Save &Animation ..."), this);
+//    action->setShortcut(tr("Ctrl+A"));
+    action->setStatusTip(tr("Save comptued animation to SVG file"));
+    connect(action, SIGNAL(triggered()), this, SLOT(saveAnimation()));
+    fileMenu->addAction(action);
 	
 	fileMenu->addSeparator();
 	
@@ -668,13 +676,8 @@ void MainWindow::saveBarMask()
 
 bool MainWindow::saveImage(const QImage& img, const QString& caption)
 {
-	if (img.isNull()) {
-		QMessageBox::warning(
-			this, 
-			tr("Warning"), 
-			tr("Compute the animation first (Edit -> Compute) for having any results to get saved."));
-		return false;
-	}
+    /* we need an animation to save anything */
+    if (!animationIsComputed()) return false;
 	
 	do {
 		QString filename = QFileDialog::getSaveFileName( 
@@ -695,6 +698,144 @@ bool MainWindow::saveImage(const QImage& img, const QString& caption)
 	} while (true);
 	
 	return true;
+}
+
+//----------------------------------------------------------------------
+
+/*! \brief Check if animation has already been computed
+ *
+ * Before we are able to save anything, the animation must have been computed.
+ * This is checked by this method. If no animation has been computed, an error
+ * message is displayed.
+ *
+ * \return True, if the animation has been computed and false otherwise.
+ */
+bool MainWindow::animationIsComputed()
+{
+    if (baseImage.isNull() || barMask.isNull()) {
+        QMessageBox::warning(
+            this,
+            tr("Warning"),
+            tr("Please compute the animation first (Edit -> Compute Animation). Then we are able to save any results."));
+        return false;
+    }
+
+    return true;
+}
+//----------------------------------------------------------------------
+
+/*! \brief Save computed animation to SVG file
+ *
+ * This method takes an already computed animation and saves it to an animated
+ * SVG file. This is done in such a way, that the animation may be rendered
+ * by viewing the SVG file in any modern browser. Moreover, the animation
+ * shall be loadable to animbar for further edit in future versions.
+ */
+void MainWindow::saveAnimation()
+{
+    /* we need an animation to save anything */
+    if (!animationIsComputed()) return;
+
+    unsigned int nrFrames, stripWidth;
+    getParameters(barMask, nrFrames, stripWidth);
+
+}
+
+//----------------------------------------------------------------------
+
+/*! \brief Get parameters from bar mask image
+ *
+ * This method reconstruct number of frames and pixel width per frame from
+ * a bar mask image.
+ *
+ * \param img Bar mask image
+ * \param nrFrames (out) Number of frame images
+ * \param stripWidth (out) Strip width in pixels
+ *
+ * \return True if reconstruction of parameters was successful and false
+ *  otherwise. The latter case indicates that the provided image is not a valid
+ *  bar mask image.
+ */
+bool MainWindow::getParameters(const QImage& img, unsigned int& nrFrames, unsigned int& stripWidth)
+{
+    nrFrames = 0;
+    stripWidth = 0;
+
+    /* check format */
+    if (img.format() != QImage::Format_Mono) {
+        QMessageBox::warning(
+            this,
+            tr("Warning"),
+            tr("The bar mask image is of invalid format."));
+        return false;
+    }
+
+    /* we start with a white strip, followed by the black strips */
+    if (img.pixelIndex(0,0) != 1) {
+        QMessageBox::warning(
+            this,
+            tr("Warning"),
+            tr("The bar mask image is of unexpected contents."));
+        return false;
+    }
+
+    /* We examine the first row always. The width of the white strip is the
+     * stripwidth
+     */
+    while ((img.pixelIndex(stripWidth,0) == 1) && (stripWidth < (unsigned int) img.width())) stripWidth++;
+
+    if (stripWidth >= (unsigned int) img.width()) {
+        QMessageBox::warning(
+            this,
+            tr("Warning"),
+            tr("The bar mask image is of unexpected size (stripWidth)."));
+        return false;
+    }
+
+    if (stripWidth == 0) {
+        QMessageBox::warning(
+            this,
+            tr("Warning"),
+            tr("The bar mask image is of unsupported contents (stripWidth)."));
+        return false;
+    }
+
+    /* The number of frame images is the width of the black strip, divided by
+     * the strip width, plus one.
+     */
+    nrFrames = stripWidth;
+    while ((img.pixelIndex(nrFrames,0) == 0) && (nrFrames < (unsigned int) img.width())) nrFrames++;
+
+    if (nrFrames >= (unsigned int) img.width()) {
+        QMessageBox::warning(
+            this,
+            tr("Warning"),
+            tr("The bar mask image is of unexpected size (nrFrames)."));
+        return false;
+    }
+
+    /* check */
+
+    if (nrFrames == 0) {
+        QMessageBox::warning(
+            this,
+            tr("Warning"),
+            tr("The bar mask image is of unsupported contents (nrFrames)."));
+        return false;
+    }
+
+    div_t res = div(nrFrames, stripWidth);
+    if (res.rem != 0) {
+        QMessageBox::warning(
+            this,
+            tr("Warning"),
+            tr("The bar mask image is of invalid contents (nrFrames)."));
+        return false;
+    }
+
+    nrFrames /= stripWidth;
+
+    return true;
 }
 
 //----------------------------------------------------------------------

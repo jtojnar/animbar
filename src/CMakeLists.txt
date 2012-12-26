@@ -95,19 +95,19 @@ SET(QTCONF_DEST_DIR bin)
 SET(DIRS ${QT_BINARY_DIR})
 SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}")
 IF(APPLE)
-  SET(PLUGIN_DEST_DIR QtTest.app/Contents/MacOS)
-  SET(QTCONF_DEST_DIR QtTest.app/Contents/Resources)
-  SET(APPS "\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app")
+    SET(PLUGIN_DEST_DIR QtTest.app/Contents/MacOS)
+    SET(QTCONF_DEST_DIR QtTest.app/Contents/Resources)
+    SET(APPS "\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app")
 ENDIF(APPLE)
 IF(WIN32)
-  SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.exe")
+    SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.exe")
 ENDIF(WIN32)
 
 #-----------------------------------------------------------------------
 # this is the major install command that we need to get binary packaging
 # to work, for example
 INSTALL(
-	TARGETS ${PROJECT_NAME} 
+    TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION . COMPONENT Runtime
     RUNTIME DESTINATION bin COMPONENT Runtime
 )
