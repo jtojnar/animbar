@@ -56,7 +56,8 @@ MainWindow::MainWindow() : QMainWindow()
 void MainWindow::_init()
 {
 	openDir = QDir::home();
-	saveDir = openDir;
+    saveDirImage = openDir;
+    saveDirAnimation = openDir;
 	setSaveToOpen = true;
 	
 	/* strip width in pixels, three seems to be a good value */
@@ -405,7 +406,8 @@ void MainWindow::openFile()
 	
 	if (files.size() > 0) openDir.setPath(files[0]);
 	if (setSaveToOpen) {
-		saveDir = openDir;
+        saveDirImage = QFileInfo(openDir.absolutePath()).absolutePath();
+        saveDirAnimation = QFileInfo(openDir.absolutePath()).absolutePath();
 		setSaveToOpen = false;
 	}
 	
@@ -686,16 +688,16 @@ bool MainWindow::saveImage(const QImage& img, const QString& caption)
 		QString filename = QFileDialog::getSaveFileName( 
 			this, 
 			caption, 
-			saveDir.absolutePath(), 
+            saveDirImage.absolutePath(),
 			getSupportedImageFormats());
 			
 		if (!filename.isNull()) {
-			saveDir.setPath(filename);
+            saveDirImage.setPath(filename);
 			if (!img.save(filename))
 				QMessageBox::warning(
 					this, 
 					tr("Warning"), 
-					tr("Failed to save to ") + filename + tr(". Please try again with another filename."));
+                    tr("Failed to save to ") + filename + tr(". Please try again with another filename. The filetype is determined by the filename's ending, so please provide a valid filename ending (e.g. \".png\")."));
 			else break;
 		} else break;
 	} while (true);
@@ -736,12 +738,14 @@ bool MainWindow::animationIsComputed()
  *
  * See:
  *  http://www.w3.org/TR/SVG/animate.html#CalcModeAttribute
+ *  http://qt-project.org/doc/qt-4.8/qxmlstreamwriter.html
  */
 void MainWindow::saveAnimation()
 {
     /* we need an animation to save anything */
     if (!animationIsComputed()) return;
 
+    /* get configuration settings from barMask */
     unsigned int nrFrames, stripWidth;
     getParameters(barMask, nrFrames, stripWidth);
 
@@ -753,14 +757,30 @@ void MainWindow::saveAnimation()
         return;
     }
 
-    QFile xmlFile("/tmp/test.svg");
+    QString filename = QFileDialog::getSaveFileName(
+        this,
+        "Enter filename to save SVG animation",
+        saveDirAnimation.absolutePath(),
+        tr("SVG animation file (*.svg)"));
+
+    if (filename.isNull()) return;
+
+    if (QFileInfo(filename).suffix().length() == 0) filename += ".svg";
+
+    saveDirAnimation.setPath(filename);
+
+    QFile xmlFile(filename);
     if (!xmlFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::warning(
             this,
             tr("Warning"),
-            tr("Failed to open ") + xmlFile.fileName()  + tr(" for writing."));
+            tr("Failed to open ") + xmlFile.fileName()  + tr(" for writing. Please make sure you have the correct permissions."));
         return;
     }
+
+    /*
+     * write XML
+     */
 
     QXmlStreamWriter xmlOutput(&xmlFile);
     xmlOutput.setAutoFormatting(true);
@@ -775,6 +795,8 @@ void MainWindow::saveAnimation()
     xmlOutput.writeAttribute("width", QString::number(barMask.width()));
     xmlOutput.writeAttribute("height", QString::number(barMask.height()));
 
+    /* write complete images before the bar mask */
+
     for ( unsigned int i=0 ; i<nrFrames ; i++ ) {
         xmlWriteImage(xmlOutput, *m_animationImages[i], i*(m_animationImages[i]->width() - stripWidth));
         xmlWriteAnimation(xmlOutput, *m_animationImages[i], nrFrames);
@@ -782,9 +804,17 @@ void MainWindow::saveAnimation()
         xmlOutput.writeEndElement();
     }
 
-    xmlWriteImage(xmlOutput, barMask, 0);
+    /* We write a copy of barMask, that has the white color replaced by a
+     * fully transparent color.
+     */
+    QImage barMaskCopy = barMask;
+    QVector< QRgb > colorTable = barMaskCopy.colorTable();
+    colorTable[1] = QColor(255,255,255,0).rgba();
+    barMaskCopy.setColorTable(colorTable);
+    xmlWriteImage(xmlOutput, barMaskCopy, 0);
     xmlOutput.writeEndElement();
 
+    /* epilog */
     xmlOutput.writeEndElement();        // svg
     xmlOutput.writeEndDocument();
 
@@ -793,8 +823,10 @@ void MainWindow::saveAnimation()
 
 //----------------------------------------------------------------------
 
-/*! \brief
+/*! \brief Write image in base64 encoded PNG format
  *
+ * SVG files support embedding of images as base64 encoded PNG files. This
+ * method writes an entire SVG image tag with the image file as xlink.
  * We do not end the element, so the caller must call
  *      xmlOutput.writeEndElement();
  * sooner or later.
@@ -830,7 +862,7 @@ bool MainWindow::xmlWriteImage(
 
 //----------------------------------------------------------------------
 
-/*! \brief
+/*! \brief Write animation element.
  *
  * We do not end the element, so the caller must call
  *      xmlOutput.writeEndElement();
@@ -867,7 +899,10 @@ bool MainWindow::xmlWriteAnimation(
 /*! \brief Get parameters from bar mask image
  *
  * This method reconstruct number of frames and pixel width per frame from
- * a bar mask image.
+ * a bar mask image. Please note that this works with pixel indices on a
+ * monochrome image only. The 0 index is considered to be the opaque bars
+ * (usually black), while the 1 indices are the transparent bars (usually
+ * transparent or white).
  *
  * \param img Bar mask image
  * \param nrFrames (out) Number of frame images

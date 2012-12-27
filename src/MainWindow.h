@@ -97,7 +97,9 @@ private:
 	QSlider *slider;
 	
 	QDir openDir;
-	QDir saveDir;
+    /* Directory images or animation were last saved to */
+    QDir saveDirImage;
+    QDir saveDirAnimation;
 	bool setSaveToOpen;
 	
 	QImage baseImage;
