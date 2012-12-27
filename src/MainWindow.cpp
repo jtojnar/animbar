@@ -505,6 +505,9 @@ void MainWindow::compute()
 
 bool MainWindow::compute(const std::vector< QImage* > imgs)
 {
+    /* store this to save the animation later */
+    m_animationImages = imgs;
+
 	int nrImgs = imgs.size();
 	
 	if (nrImgs <= 0) {
@@ -730,6 +733,9 @@ bool MainWindow::animationIsComputed()
  * SVG file. This is done in such a way, that the animation may be rendered
  * by viewing the SVG file in any modern browser. Moreover, the animation
  * shall be loadable to animbar for further edit in future versions.
+ *
+ * See:
+ *  http://www.w3.org/TR/SVG/animate.html#CalcModeAttribute
  */
 void MainWindow::saveAnimation()
 {
@@ -739,6 +745,121 @@ void MainWindow::saveAnimation()
     unsigned int nrFrames, stripWidth;
     getParameters(barMask, nrFrames, stripWidth);
 
+    if (nrFrames != m_animationImages.size()) {
+        QMessageBox::warning(
+            this,
+            tr("Warning"),
+            tr("We are not able to store the animation."));
+        return;
+    }
+
+    QFile xmlFile("/tmp/test.svg");
+    if (!xmlFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::warning(
+            this,
+            tr("Warning"),
+            tr("Failed to open ") + xmlFile.fileName()  + tr(" for writing."));
+        return;
+    }
+
+    QXmlStreamWriter xmlOutput(&xmlFile);
+    xmlOutput.setAutoFormatting(true);
+
+    xmlOutput.writeStartDocument("1.0", false);
+    xmlOutput.writeDTD("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
+
+    xmlOutput.writeStartElement("svg");
+    xmlOutput.writeAttribute("xmlns", "http://www.w3.org/2000/svg");
+    xmlOutput.writeAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+    xmlOutput.writeAttribute("version", "1.1");
+    xmlOutput.writeAttribute("width", QString::number(barMask.width()));
+    xmlOutput.writeAttribute("height", QString::number(barMask.height()));
+
+    for ( unsigned int i=0 ; i<nrFrames ; i++ ) {
+        xmlWriteImage(xmlOutput, *m_animationImages[i], i*(m_animationImages[i]->width() - stripWidth));
+        xmlWriteAnimation(xmlOutput, *m_animationImages[i], nrFrames);
+        xmlOutput.writeEndElement();
+        xmlOutput.writeEndElement();
+    }
+
+    xmlWriteImage(xmlOutput, barMask, 0);
+    xmlOutput.writeEndElement();
+
+    xmlOutput.writeEndElement();        // svg
+    xmlOutput.writeEndDocument();
+
+    xmlFile.close();
+}
+
+//----------------------------------------------------------------------
+
+/*! \brief
+ *
+ * We do not end the element, so the caller must call
+ *      xmlOutput.writeEndElement();
+ * sooner or later.
+ *
+ * \param xmlOutput
+ * \param image
+ * \param x0
+ *
+ * \return
+ */
+bool MainWindow::xmlWriteImage(
+        QXmlStreamWriter& xmlOutput,
+        const QImage& image,
+        unsigned int x0) const
+{
+    xmlOutput.writeStartElement("image");
+    xmlOutput.writeAttribute("id", "barMask");
+    xmlOutput.writeAttribute("width", QString::number(image.width()));
+    xmlOutput.writeAttribute("height", QString::number(image.height()));
+    xmlOutput.writeAttribute("x", QString::number(x0));
+    xmlOutput.writeAttribute("y", QString::number(0));
+
+    /* This is copied from the QT docs */
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    buffer.open(QIODevice::ReadWrite);
+    image.save(&buffer, "PNG");
+    xmlOutput.writeAttribute("xlink:href", QString("data:image/png;base64,") + QString(buffer.buffer().toBase64().data()));
+    buffer.close();
+
+    return true;
+}
+
+//----------------------------------------------------------------------
+
+/*! \brief
+ *
+ * We do not end the element, so the caller must call
+ *      xmlOutput.writeEndElement();
+ * sooner or later.
+ *
+ * \param xmlOutput
+ * \param image
+ * \param nrFrames
+ *
+ * \return
+ */
+bool MainWindow::xmlWriteAnimation(
+        QXmlStreamWriter& xmlOutput,
+        const QImage& image,
+        unsigned int nrFrames) const
+{
+    xmlOutput.writeStartElement("animateMotion");
+    xmlOutput.writeAttribute("dur", QString("%1s").arg(nrFrames));
+    xmlOutput.writeAttribute("calcMode", "discrete");
+    xmlOutput.writeAttribute("repeatCount", "indefinite");
+    QString values, keyTimes;
+    for (unsigned int i=0; i<nrFrames; i++) {
+        values += QString("%1,0;").arg((-1) * ((int) i) * image.width());
+        keyTimes += QString("%1;").arg(((float) i) / (nrFrames));
+    }
+    xmlOutput.writeAttribute("values", values);
+    xmlOutput.writeAttribute("keyTimes", keyTimes);
+
+    return true;
 }
 
 //----------------------------------------------------------------------

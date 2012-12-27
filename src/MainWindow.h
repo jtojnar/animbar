@@ -60,7 +60,6 @@ private slots:
 	/* the other slots */
 	void sliderChangedValue(int);
 	
-
 private:
 	/* private member functions */
 	void _init();
@@ -71,6 +70,10 @@ private:
     /* documented in source code */
     bool getParameters(const QImage&, unsigned int&, unsigned int&);
 	
+    /* documented in source code */
+    bool xmlWriteImage(QXmlStreamWriter&, const QImage&, unsigned int) const;
+    bool xmlWriteAnimation(QXmlStreamWriter&, const QImage&, unsigned int) const;
+
 	void renderCurrentPixmap();
 	
 	bool setupUI();
@@ -104,6 +107,12 @@ private:
 	QPixmap currentPixmap;
 	int stripWidth;
 	double zoomFactor;
+
+    /*! In order to be able to save the animation with the complete original
+     * images, we need to know from which images we computed the animation (in
+     * case only a subset was selected. This selection is stored in here.
+     */
+    std::vector< QImage* > m_animationImages;
 };
 
 #endif // _MAINWINDOWFORM_H
