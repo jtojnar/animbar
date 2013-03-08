@@ -71,6 +71,20 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 add_subdirectory(src)
 
 #-----------------------------------------------------------------------
+# icons
+#-----------------------------------------------------------------------
+
+SET(animbar_ICONS
+	icon/animbar.png
+	icon/animbar.svg
+	icon/animbar.ico
+)
+
+#-----------------------------------------------------------------------
+# install the icons
+INSTALL (FILES ${animbar_ICONS} DESTINATION ${CMAKE_INSTALL_PREFIX}/pixmaps/)
+
+#-----------------------------------------------------------------------
 # cpack configuration
 #-----------------------------------------------------------------------
 

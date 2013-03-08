@@ -184,6 +184,15 @@ bool MainWindow::setupUI()
 	 **/
 	 	
 	statusBar()->showMessage(welcomeMsg, 5000);
+
+    /**
+     * Set the window icon
+     **/
+
+    QIcon icon("../pixmaps/animbar.svg");
+    if (icon.isNull())
+        std::cerr << "MainWindow::setupUI - Failed to load icon." << std::endl;
+    QApplication::setWindowIcon(icon);
 	
 	return true;
 }

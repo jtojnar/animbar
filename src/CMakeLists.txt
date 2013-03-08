@@ -25,7 +25,7 @@ ENDIF (WIN32)
 # ignore all runtimes except our static Multi-threaded one.
 #	http://msdn.microsoft.com/en-us/library/Aa267384 
 
-if (WIN32)
+IF (WIN32)
 	SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:libc.lib")
 	SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:msvcrt.lib")
 	SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:libcd.lib")
@@ -57,6 +57,10 @@ SET(animbar_SRCS
 	main.cpp
 	MainWindow.cpp
 )
+
+IF (WIN32)
+	set(animbar_SRCS ${animbar_SRCS} ../animbar.rc)
+ENDIF (WIN32)
 
 SET(animbar_MOC_HDRS
 	MainWindow.h
@@ -147,4 +151,5 @@ INSTALL(
     " 
     COMPONENT Runtime
 )
+
 
