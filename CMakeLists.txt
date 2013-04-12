@@ -53,7 +53,9 @@ INCLUDE(${QT_USE_FILE})
 # some all platform options
 #-----------------------------------------------------------------------
 
-add_definitions(-DANIMBAR_DEBUG)
+SET(CMAKE_BUILD_TYPE Release)
+
+#add_definitions(-DANIMBAR_DEBUG)
 
 IF(NOT CMAKE_BUILD_TYPE)
 	SET(
@@ -82,7 +84,11 @@ SET(animbar_ICONS
 
 #-----------------------------------------------------------------------
 # install the icons
-INSTALL (FILES ${animbar_ICONS} DESTINATION ${CMAKE_INSTALL_PREFIX}/pixmaps/)
+INSTALL(
+	FILES ${animbar_ICONS} 
+	DESTINATION pixmaps/ 
+	COMPONENT Runtime
+)
 
 #-----------------------------------------------------------------------
 # cpack configuration
@@ -111,6 +117,9 @@ set(CPACK_SOURCE_PACKAGE_FILE_NAME "${PROJECT_NAME}-${CPACK_PACKAGE_VERSION}")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README")
 set(CPACK_NSIS_URL_INFO_ABOUT "http:////animbar.mnim.org")
+# This makes NSIS asks if we want to add the animbar install dir to the
+# system path AND if a desktop icon shall be created  
+set(CPACK_NSIS_MODIFY_PATH "ON")
 # setting the following gives us a start menu entry on windows.
 set(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}" "${PROJECT_NAME}")
 

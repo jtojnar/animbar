@@ -130,7 +130,7 @@ MESSAGE("${QT_PLUGINS_DIR}")
 
 #-----------------------------------------------------------------------
 # the following inserts CODE to the INSTALL script to write a qt.conf,
-# from what I can tell this just creates and empty qt.conf.
+# from what I can tell this just creates an empty qt.conf.
 INSTALL(
 	CODE "
 		file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QTCONF_DEST_DIR}/qt.conf\" \"\")

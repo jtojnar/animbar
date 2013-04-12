@@ -156,10 +156,13 @@ bool MainWindow::setupUI()
 		"<p><font size=+3>3.</font> Verify the generated output by moving the slider " +
 		"at the bottom of the user interface. Use the <i>zoom</i> entries in the <i>View</i> " +
 		"menu to further evaluate the animation.</p>" +
-		"<p><font size=+3>4.</font> To test the generated output in a real world animation, " +
+		"<p><font size=+3>4a.</font> To test the generated output in a real world animation, " +
 		"use <i>Save Base Image ...</i> and <i>Save Bar Mask ...</i> in the <i>File</i> menu " +
 		"to save the output to image files. Print the base image on paper and the bar mask " +
 		"to transparancy.</p>" +
+		"<p><font size=+3>4b.</font> To share your animation with others, use <i>Save Animation ...</i> " +
+		"in the <i>File</i> menu to save to an animated SVG file. For example, any recent browser supports " +
+		"animated SVGs, so you may even include them in homepages. </p>" +
 		"<p>If you have any suggestion or need further assistance, check out " +
 		"<a href=\"http://animbar.mnim.org\" style=\"color: white;\">http://animbar.mnim.org</a>.</p>"
 	);
@@ -989,7 +992,7 @@ bool MainWindow::getParameters(const QImage& img, unsigned int& nrFrames, unsign
         return false;
     }
 
-    div_t res = div(nrFrames, stripWidth);
+    div_t res = div((int) nrFrames, (int) stripWidth);
     if (res.rem != 0) {
         QMessageBox::warning(
             this,
