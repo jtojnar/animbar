@@ -45,7 +45,7 @@ ENDIF(MSVC)
 # setup qt
 #-----------------------------------------------------------------------
 
-FIND_PACKAGE(Qt4 REQUIRED)
+FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtXml QtSvg)
 
 INCLUDE(${QT_USE_FILE})
 
@@ -84,6 +84,7 @@ SET(animbar_ICONS
 
 #-----------------------------------------------------------------------
 # install the icons
+
 INSTALL(
 	FILES ${animbar_ICONS} 
 	DESTINATION pixmaps/ 

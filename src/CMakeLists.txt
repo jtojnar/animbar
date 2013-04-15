@@ -120,13 +120,17 @@ INSTALL(
 # apart from application plugins, qt provides an interface to have
 # plugins to itself, e.g. image format support etc. the following 
 # includes all image format plugins. that is what we want.
+# We exlude any *.lib file from that directory. However, we will
+# distribute debug versions of of the DLLs. The reason is there might
+# be a plugin ending in "d" and this we could not easily exlude. See also
+# the fixup_bundle command below.
+
 INSTALL(
 	DIRECTORY "${QT_PLUGINS_DIR}/imageformats" 
 	DESTINATION ${PLUGIN_DEST_DIR}/plugins 
 	COMPONENT Runtime
+	PATTERN "*lib" EXCLUDE
 )
-
-MESSAGE("${QT_PLUGINS_DIR}")
 
 #-----------------------------------------------------------------------
 # the following inserts CODE to the INSTALL script to write a qt.conf,
@@ -139,17 +143,24 @@ INSTALL(
 )
 
 #-----------------------------------------------------------------------
-# now here happens the real magic. the BundleUtilities copy all Qt
+# now here happens some real magic. the BundleUtilities copy all Qt
 # dependancies.
+# The first "file" command generates a list of files that shall be 
+# examined in addition to the target (the plugins themselves are included
+# We need this line to have qtsvg4.dll included. Please note that we
+# exclude all files with a d suffix. Otherwise, the debug versions of 
+# the qt dlls get pulled in as well. this matching pattern will include
+# any release plugin ending in d, but that should be ok.
+# above into the installation package).
+# The second and third command pull in all dll dependancies then-
 
 INSTALL(
 	CODE "
-		file(GLOB_RECURSE QTPLUGINS
-		\"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+		file(GLOB_RECURSE QTPLUGINS	\"\${CMAKE_INSTALL_PREFIX}/${PLUGIN_DEST_DIR}/plugins/*[!d]4${CMAKE_SHARED_LIBRARY_SUFFIX}\")
 		include(BundleUtilities)
 		fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
-    " 
-    COMPONENT Runtime
+   " 
+  COMPONENT Runtime
 )
 
 

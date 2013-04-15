@@ -82,6 +82,15 @@ and the bar mask
 	File -> Save Bar Mask ...
 You may now print the computed images with your favourite application.
 
+Alternatively, you may use 
+	File -> Save Animation
+to save the animation to an animated SVG file. The SVG file will include
+the base images and the bar mask and will display the computed animation
+in any SVG viewer that supports animation. Modern browsers such as 
+Firefox or Chrome are able to display animated SVGs. Somewhen in the 
+future there will be the possibilities to load animations from such an
+SVG file into animbar.
+
 A word on printing. We will obtain best results when we print the images
 without any scaling involved. Downscaling the images, this means 
 reducing the number of pixels that gets printed, will decline the 
