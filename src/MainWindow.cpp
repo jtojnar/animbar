@@ -239,8 +239,13 @@ bool MainWindow::setupMenus()
 
     action = new QAction(tr("Save &Animation ..."), this);
 //    action->setShortcut(tr("Ctrl+A"));
-    action->setStatusTip(tr("Save comptued animation to SVG file"));
+    action->setStatusTip(tr("Save comptued animation to SVG file (you will be able to load that into animbar again)"));
     connect(action, SIGNAL(triggered()), this, SLOT(saveAnimation()));
+    fileMenu->addAction(action);
+
+    action = new QAction(tr("&Export Animation ..."), this);
+    action->setStatusTip(tr("Export comptued animation to SVG file (you won't be able to load that into animbar again)"));
+    connect(action, SIGNAL(triggered()), this, SLOT(exportAnimation()));
     fileMenu->addAction(action);
 	
 	fileMenu->addSeparator();
@@ -765,7 +770,7 @@ void MainWindow::saveAnimation()
         QMessageBox::warning(
             this,
             tr("Warning"),
-            tr("We are not able to store the animation."));
+            tr("We are not able to save the animation."));
         return;
     }
 
@@ -790,6 +795,10 @@ void MainWindow::saveAnimation()
         return;
     }
 
+    bool ok;
+    double animDuration = QInputDialog::getDouble(this, "Animation Duration", "Duration of Animation (s): ", nrFrames, 0, 100000, 2, &ok);
+    if (!ok) return;
+
     /*
      * write XML
      */
@@ -811,7 +820,7 @@ void MainWindow::saveAnimation()
 
     for ( unsigned int i=0 ; i<nrFrames ; i++ ) {
         xmlWriteImage(xmlOutput, *m_animationImages[i], i*(m_animationImages[i]->width() - stripWidth));
-        xmlWriteAnimation(xmlOutput, *m_animationImages[i], nrFrames);
+        xmlWriteAnimation(xmlOutput, m_animationImages[i]->width(), nrFrames, animDuration);
         xmlOutput.writeEndElement();
         xmlOutput.writeEndElement();
     }
@@ -830,6 +839,93 @@ void MainWindow::saveAnimation()
     xmlOutput.writeEndElement();        // svg
     xmlOutput.writeEndDocument();
 
+    xmlFile.close();
+}
+
+//----------------------------------------------------------------------
+
+/*! \brief Export computed animation to SVG file
+ *
+ * This method takes an already computed animation and saves it to an animated
+ * SVG file. This is done in such a way, that the animation may be rendered
+ * by viewing the SVG file in any modern browser. In contrast to saveAnimtion,
+ * the animation can't be loaded into animbar again.
+ */
+void MainWindow::exportAnimation()
+{
+    /* we need an animation to save anything */
+    if (!animationIsComputed()) return;
+
+    /* get configuration settings from barMask */
+    unsigned int nrFrames, stripWidth;
+    getParameters(barMask, nrFrames, stripWidth);
+
+    if (nrFrames != m_animationImages.size()) {
+        QMessageBox::warning(
+            this,
+            tr("Warning"),
+            tr("We are not able to export the animation."));
+        return;
+    }
+
+    QString filename = QFileDialog::getSaveFileName(
+        this,
+        "Enter filename to export SVG animation",
+        saveDirAnimation.absolutePath(),
+        tr("SVG animation file (*.svg)"));
+
+    if (filename.isNull()) return;
+
+    if (QFileInfo(filename).suffix().length() == 0) filename += ".svg";
+
+    saveDirAnimation.setPath(filename);
+
+    bool ok;
+    double animDuration = QInputDialog::getDouble(this, "Animation Duration", "Duration of Animation (s): ", nrFrames, 0, 100000, 2, &ok);
+    if (!ok) return;
+
+    QFile xmlFile(filename);
+    if (!xmlFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::warning(
+            this,
+            tr("Warning"),
+            tr("Failed to open ") + xmlFile.fileName()  + tr(" for writing. Please make sure you have the correct permissions."));
+        return;
+    }
+
+    QXmlStreamWriter xmlOutput(&xmlFile);
+    xmlOutput.setAutoFormatting(true);
+
+    xmlOutput.writeStartDocument("1.0", false);
+    xmlOutput.writeDTD("<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">");
+
+    xmlOutput.writeStartElement("svg");
+    xmlOutput.writeAttribute("xmlns", "http://www.w3.org/2000/svg");
+    xmlOutput.writeAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+    xmlOutput.writeAttribute("version", "1.1");
+    xmlOutput.writeAttribute("width", QString::number(barMask.width()));
+    xmlOutput.writeAttribute("height", QString::number(barMask.height()));
+
+    /* write complete images before the bar mask */
+
+    xmlWriteImage(xmlOutput, baseImage, 0);
+    xmlWriteAnimation(xmlOutput, stripWidth, nrFrames, animDuration);
+    xmlOutput.writeEndElement();
+    xmlOutput.writeEndElement();
+
+    /* We write a copy of barMask, that has the white color replaced by a
+     * fully transparent color.
+     */
+    QImage barMaskCopy = barMask;
+    QVector< QRgb > colorTable = barMaskCopy.colorTable();
+    colorTable[1] = QColor(255,255,255,0).rgba();
+    barMaskCopy.setColorTable(colorTable);
+    xmlWriteImage(xmlOutput, barMaskCopy, 0);
+    xmlOutput.writeEndElement();
+
+    /* epilog */
+    xmlOutput.writeEndElement();        // svg
+    xmlOutput.writeEndDocument();
     xmlFile.close();
 }
 
@@ -888,16 +984,17 @@ bool MainWindow::xmlWriteImage(
  */
 bool MainWindow::xmlWriteAnimation(
         QXmlStreamWriter& xmlOutput,
-        const QImage& image,
-        unsigned int nrFrames) const
+        int delta,
+        unsigned int nrFrames,
+        double duration) const
 {
     xmlOutput.writeStartElement("animateMotion");
-    xmlOutput.writeAttribute("dur", QString("%1s").arg(nrFrames));
+    xmlOutput.writeAttribute("dur", QString("%1s").arg(duration));
     xmlOutput.writeAttribute("calcMode", "discrete");
     xmlOutput.writeAttribute("repeatCount", "indefinite");
     QString values, keyTimes;
     for (unsigned int i=0; i<nrFrames; i++) {
-        values += QString("%1,0;").arg((-1) * ((int) i) * image.width());
+        values += QString("%1,0;").arg((-1) * ((int) i) * delta);
         keyTimes += QString("%1;").arg(((float) i) / (nrFrames));
     }
     xmlOutput.writeAttribute("values", values);

@@ -45,7 +45,10 @@ ENDIF(MSVC)
 # setup qt
 #-----------------------------------------------------------------------
 
-FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtXml QtSvg)
+# On Ubuntu, run cmake with -DQT_QMAKE_EXECUTABLE=/usr/bin/qmake-qt4, the 
+# export QT_SELECT mechanism does confuse FindQt4, e.g.
+#		cmake ../ -DQT_QMAKE_EXECUTABLE=/usr/bin/qmake-qt4
+FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml QtSvg REQUIRED)
 
 INCLUDE(${QT_USE_FILE})
 
@@ -53,7 +56,8 @@ INCLUDE(${QT_USE_FILE})
 # some all platform options
 #-----------------------------------------------------------------------
 
-SET(CMAKE_BUILD_TYPE Release)
+SET(CMAKE_BUILD_TYPE Debug)
+#SET(CMAKE_BUILD_TYPE Release)
 
 #add_definitions(-DANIMBAR_DEBUG)
 

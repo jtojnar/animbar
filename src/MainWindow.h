@@ -47,6 +47,7 @@ private slots:
 	void saveBaseImage();
 	void saveBarMask();
     void saveAnimation();
+    void exportAnimation();
 
 	void compute();
 	
@@ -72,7 +73,7 @@ private:
 	
     /* documented in source code */
     bool xmlWriteImage(QXmlStreamWriter&, const QImage&, unsigned int) const;
-    bool xmlWriteAnimation(QXmlStreamWriter&, const QImage&, unsigned int) const;
+    bool xmlWriteAnimation(QXmlStreamWriter&, int, unsigned int, double) const;
 
 	void renderCurrentPixmap();
 	
@@ -104,7 +105,7 @@ private:
 	
 	QImage baseImage;
 	QImage barMask;
-	QImage image;
+    QImage image;
 	
 	QPixmap currentPixmap;
 	int stripWidth;
