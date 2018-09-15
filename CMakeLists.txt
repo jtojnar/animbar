@@ -20,7 +20,7 @@
 # projects. "animbar" compiles the source and "package" creates the windows
 # installer. Only release builds will work on win32 because of dependancy madness.
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1.0)
 
 project(animbar) 
 
@@ -45,12 +45,10 @@ ENDIF(MSVC)
 # setup qt
 #-----------------------------------------------------------------------
 
-# On Ubuntu, run cmake with -DQT_QMAKE_EXECUTABLE=/usr/bin/qmake-qt4, the 
-# export QT_SELECT mechanism does confuse FindQt4, e.g.
-#		cmake ../ -DQT_QMAKE_EXECUTABLE=/usr/bin/qmake-qt4
-FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml QtSvg REQUIRED)
-
-INCLUDE(${QT_USE_FILE})
+# On Ubuntu, run cmake with -DQT_QMAKE_EXECUTABLE=/usr/bin/qmake-qt5, thes
+# export QT_SELECT mechanism does confuse FindQt, e.g.
+#		cmake ../ -DQT_QMAKE_EXECUTABLE=/usr/bin/qmake-qt5
+FIND_PACKAGE(Qt5 COMPONENTS Core Widgets Xml Svg REQUIRED)
 
 #-----------------------------------------------------------------------
 # some all platform options

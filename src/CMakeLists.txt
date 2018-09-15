@@ -1,9 +1,6 @@
 #
 # for cmake and qt see
-# 		http://cmake.org/cmake/help/cmake2.6docs.html#module:FindQt4
-# and
-#		http://www.bineteri.com/qtwithcmake
-#
+# 		https://doc.qt.io/qt-5/cmake-manual.html
 
 #-----------------------------------------------------------------------
 # static runtime linking (is bad, but we don't want to go through the
@@ -67,7 +64,7 @@ SET(animbar_MOC_HDRS
 )
 
 # moc 'em
-QT4_WRAP_CPP(animbar_MOC_SRCS ${animbar_MOC_HDRS})
+QT5_WRAP_CPP(animbar_MOC_SRCS ${animbar_MOC_HDRS})
 
 #-----------------------------------------------------------------------
 # What makes up our final target executable. WIN32, MACOSX_BUNDLE that
@@ -81,7 +78,7 @@ ADD_EXECUTABLE(animbar
 )
 
 TARGET_LINK_LIBRARIES(animbar 
-	${QT_LIBRARIES}
+	Qt5::Widgets
 )
 
 #-----------------------------------------------------------------------

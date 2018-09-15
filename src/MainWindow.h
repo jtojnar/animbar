@@ -20,7 +20,7 @@
 #ifndef _MAINWINDOW_H
 #define _MAINWINDOW_H
 
-#include <QtGui>
+#include <QtWidgets>
 
 #include "animbar.h"
 

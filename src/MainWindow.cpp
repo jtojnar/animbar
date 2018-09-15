@@ -486,7 +486,7 @@ void MainWindow::openFile()
 		/* create new list entry and add it */
 		QFileInfo fi(files[i]);
 		QListWidgetItem *li = new QListWidgetItem(icon, fi.fileName(), imageList);
-		li->setData(Qt::UserRole, qVariantFromValue(img));
+		li->setData(Qt::UserRole, QVariant::fromValue(img));
 		li->setFlags(li->flags() | Qt::ItemIsDragEnabled);
 		imageList->addItem(li);	
 	}
